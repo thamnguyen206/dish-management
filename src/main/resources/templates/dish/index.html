@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" th:lang="${#locale.language}">
+<head th:replace="~{fragments :: head('dish.list.title')}"></head>
+<body>
+<nav th:replace="~{fragments :: nav}"></nav>
+<div class="container">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h3 class="mb-0" th:text="#{dish.list.title}">Dishes</h3>
+        <a class="btn btn-primary" th:href="@{/dishes/create}" th:text="#{dish.add}">+ Add dish</a>
+    </div>
+
+    <div th:replace="~{fragments :: alerts}"></div>
+
+    <!-- Form tìm kiếm / lọc / sắp xếp (giữ lại giá trị đã nhập sau khi gửi form) -->
+    <form method="get" th:action="@{/dishes}" class="card card-body mb-3">
+        <div class="row g-2">
+            <div class="col-md-4">
+                <label class="form-label" th:text="#{filter.keyword}">Dish name</label>
+                <input type="text" name="keyword" class="form-control" th:value="${filter.keyword}"
+                       th:placeholder="#{filter.keyword.placeholder}">
+            </div>
+            <div class="col-md-3">
+                <label class="form-label" th:text="#{filter.category}">Category</label>
+                <select name="categoryId" class="form-select">
+                    <option value="" th:text="#{common.all}">-- All --</option>
+                    <option th:each="cat : ${categories}" th:value="${cat.id}" th:text="${cat.name}"
+                            th:selected="${cat.id == filter.categoryId}"></option>
+                </select>
+            </div>
+            <div class="col-md-2">
+                <label class="form-label" th:text="#{filter.status}">Status</label>
+                <select name="status" class="form-select">
+                    <option value="" th:text="#{common.all}">-- All --</option>
+                    <option value="available" th:selected="${filter.status == 'available'}" th:text="#{status.available}">Available</option>
+                    <option value="unavailable" th:selected="${filter.status == 'unavailable'}" th:text="#{status.unavailable}">Unavailable</option>
+                </select>
+            </div>
+            <div class="col-md-3">
+                <label class="form-label" th:text="#{filter.sort}">Sort by</label>
+                <select name="sort" class="form-select">
+                    <option value="" th:text="#{filter.sort.default}">-- Default --</option>
+                    <option value="price_asc" th:selected="${filter.sort == 'price_asc'}" th:text="#{filter.sort.priceAsc}">Price: low to high</option>
+                    <option value="price_desc" th:selected="${filter.sort == 'price_desc'}" th:text="#{filter.sort.priceDesc}">Price: high to low</option>
+                    <option value="time_asc" th:selected="${filter.sort == 'time_asc'}" th:text="#{filter.sort.timeAsc}">Preparation time: shortest first</option>
+                </select>
+            </div>
+            <div class="col-md-3">
+                <label class="form-label" th:text="#{filter.minPrice}">Min price</label>
+                <input type="number" step="any" name="minPrice" class="form-control" th:value="${filter.minPrice}">
+            </div>
+            <div class="col-md-3">
+                <label class="form-label" th:text="#{filter.maxPrice}">Max price</label>
+                <input type="number" step="any" name="maxPrice" class="form-control" th:value="${filter.maxPrice}">
+            </div>
+            <div class="col-md-6 d-flex align-items-end gap-2">
+                <button type="submit" class="btn btn-primary" th:text="#{filter.submit}">Search / Filter</button>
+                <a class="btn btn-outline-secondary" th:href="@{/dishes}" th:text="#{filter.reset}">Clear filters</a>
+            </div>
+        </div>
+    </form>
+
+    <div class="alert alert-info" th:if="${errorKey == null and #lists.isEmpty(dishes)}" th:text="#{list.empty}">
+        No dishes found.
+    </div>
+
+    <div class="table-responsive" th:if="${!#lists.isEmpty(dishes)}">
+        <table class="table table-bordered align-middle">
+            <thead class="table-light">
+            <tr>
+                <th>#</th>
+                <th th:text="#{dish.image}">Image</th>
+                <th th:text="#{dish.name}">Name</th>
+                <th th:text="#{dish.category}">Category</th>
+                <th th:text="#{dish.price}">Price</th>
+                <th th:text="#{dish.time}">Preparation time (min)</th>
+                <th th:text="#{dish.type}">Type</th>
+                <th th:text="#{dish.status}">Status</th>
+                <th></th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="d : ${dishes}" th:classappend="${!d.isAvailable} ? 'table-secondary'">
+                <td th:text="${d.id}"></td>
+                <td style="width:110px">
+                    <img th:if="${d.thumbnailImage != null}" th:src="${d.thumbnailImage.imageUrl}" class="img-fluid rounded" alt="thumbnail">
+                    <span th:if="${d.thumbnailImage == null}" class="text-muted small" th:text="#{dish.noImage}">No image</span>
+                </td>
+                <td th:text="${d.name}"></td>
+                <td th:text="${d.category.name}"></td>
+                <td th:text="${#numbers.formatDecimal(d.price, 0, 'POINT', 0, 'COMMA')} + ' ' + #{common.currency}"></td>
+                <td th:text="${d.preparationTime}"></td>
+                <td>
+                    <span class="badge" th:classappend="${d.quick} ? 'bg-info' : 'bg-primary'" th:text="#{${d.timeTypeKey}}"></span>
+                </td>
+                <td>
+                    <span class="badge" th:classappend="${d.isAvailable} ? 'bg-success' : 'bg-secondary'" th:text="#{${d.statusKey}}"></span>
+                </td>
+                <td class="text-nowrap">
+                    <a class="btn btn-sm btn-outline-primary" th:href="@{/dishes/{id}(id=${d.id})}" th:text="#{common.detail}">Detail</a>
+                    <a class="btn btn-sm btn-outline-warning" th:href="@{/dishes/{id}/edit(id=${d.id})}" th:text="#{common.edit}">Edit</a>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+</body>
+</html>

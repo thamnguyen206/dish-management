@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" th:lang="${#locale.language}">
+<head th:replace="~{fragments :: head('dish.detail.title')}"></head>
+<body>
+<nav th:replace="~{fragments :: nav}"></nav>
+<div class="container">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h3 class="mb-0" th:text="${dish.name}"></h3>
+        <div>
+            <a class="btn btn-warning" th:href="@{/dishes/{id}/edit(id=${dish.id})}" th:text="#{common.edit}">Edit</a>
+            <a class="btn btn-outline-secondary" th:href="@{/dishes}" th:text="#{common.back}">Back</a>
+        </div>
+    </div>
+
+    <div th:replace="~{fragments :: alerts}"></div>
+
+    <div class="card mb-4">
+        <div class="card-body">
+            <dl class="row mb-0">
+                <dt class="col-sm-3" th:text="#{dish.category}">Category</dt>
+                <dd class="col-sm-9" th:text="${dish.category.name}"></dd>
+                <dt class="col-sm-3" th:text="#{dish.price}">Price</dt>
+                <dd class="col-sm-9" th:text="${#numbers.formatDecimal(dish.price, 0, 'POINT', 0, 'COMMA')} + ' ' + #{common.currency}"></dd>
+                <dt class="col-sm-3" th:text="#{dish.time}">Preparation time</dt>
+                <dd class="col-sm-9">
+                    <span th:text="${dish.preparationTime} + ' ' + #{common.minutes}"></span>
+                    <span class="badge bg-info ms-1" th:text="#{${dish.timeTypeKey}}"></span>
+                </dd>
+                <dt class="col-sm-3" th:text="#{dish.status}">Status</dt>
+                <dd class="col-sm-9">
+                    <span class="badge" th:classappend="${dish.isAvailable} ? 'bg-success' : 'bg-secondary'" th:text="#{${dish.statusKey}}"></span>
+                </dd>
+                <dt class="col-sm-3" th:text="#{dish.description}">Description</dt>
+                <dd class="col-sm-9" th:text="${dish.description}"></dd>
+            </dl>
+        </div>
+    </div>
+
+    <h5 th:text="#{image.title}">Dish images</h5>
+
+    <!-- Món chưa có ảnh -->
+    <div class="alert alert-info" th:if="${#lists.isEmpty(dish.images)}" th:text="#{image.none}">This dish has no images yet.</div>
+
+    <div class="row g-3 mb-4">
+        <div class="col-md-4" th:each="img : ${dish.images}">
+            <div class="card h-100" th:classappend="${img.isThumbnail} ? 'border-success border-2'">
+                <img th:src="${img.imageUrl}" class="card-img-top" th:alt="#{image.alt}">
+                <div class="card-body">
+                    <span class="badge bg-success mb-2" th:if="${img.isThumbnail}" th:text="#{image.thumbnail}">Thumbnail</span>
+                    <div class="d-flex gap-2">
+                        <form th:if="${!img.isThumbnail}" method="post"
+                              th:action="@{/dishes/{did}/images/{iid}/thumbnail(did=${dish.id}, iid=${img.id})}">
+                            <button class="btn btn-sm btn-outline-success" th:text="#{image.makeThumbnail}">Set as thumbnail</button>
+                        </form>
+                        <form method="post" th:action="@{/dishes/{did}/images/{iid}/delete(did=${dish.id}, iid=${img.id})}"
+                              th:attr="data-confirm=#{image.confirmDelete}"
+                              onsubmit="return confirm(this.dataset.confirm)">
+                            <button class="btn btn-sm btn-outline-danger" th:text="#{common.delete}">Delete</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card card-body mb-5">
+        <h6 th:text="#{image.addTitle}">Add image by URL</h6>
+        <form method="post" th:action="@{/dishes/{id}/images(id=${dish.id})}" class="row g-2 align-items-center">
+            <div class="col-md-8">
+                <input type="text" name="imageUrl" class="form-control" placeholder="https://example.com/image.jpg" required>
+            </div>
+            <div class="col-md-2">
+                <div class="form-check">
+                    <input type="checkbox" class="form-check-input" name="thumbnail" value="true" id="thumb">
+                    <label class="form-check-label" for="thumb" th:text="#{image.asThumbnail}">Set as thumbnail</label>
+                </div>
+            </div>
+            <div class="col-md-2">
+                <button class="btn btn-primary w-100" th:text="#{image.add}">Add image</button>
+            </div>
+        </form>
+    </div>
+</div>
+</body>
+</html>

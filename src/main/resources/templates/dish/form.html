@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" th:lang="${#locale.language}">
+<head th:replace="~{fragments :: head(${titleKey})}"></head>
+<body>
+<nav th:replace="~{fragments :: nav}"></nav>
+<div class="container" style="max-width:720px">
+    <h3 class="mb-3" th:text="#{${titleKey}}">Dish</h3>
+
+    <form method="post" th:action="@{${action}}" th:object="${form}" novalidate>
+        <div class="mb-3">
+            <label class="form-label" th:text="#{dish.name}">Name</label>
+            <input type="text" th:field="*{name}" class="form-control" th:classappend="${#fields.hasErrors('name')} ? 'is-invalid'">
+            <div class="invalid-feedback" th:errors="*{name}"></div>
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label" th:text="#{dish.category}">Category</label>
+            <select th:field="*{dishCategoryId}" class="form-select" th:classappend="${#fields.hasErrors('dishCategoryId')} ? 'is-invalid'">
+                <option value="" th:text="#{form.selectCategory}">-- Select a category --</option>
+                <option th:each="cat : ${categories}" th:value="${cat.id}" th:text="${cat.name}"></option>
+            </select>
+            <div class="invalid-feedback" th:errors="*{dishCategoryId}"></div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-6 mb-3">
+                <label class="form-label"><span th:text="#{dish.price}">Price</span> (<span th:text="#{common.currency}">VND</span>)</label>
+                <input type="number" step="any" th:field="*{price}" class="form-control" th:classappend="${#fields.hasErrors('price')} ? 'is-invalid'">
+                <div class="invalid-feedback" th:errors="*{price}"></div>
+            </div>
+            <div class="col-md-6 mb-3">
+                <label class="form-label" th:text="#{dish.time}">Preparation time (min)</label>
+                <input type="number" th:field="*{preparationTime}" class="form-control" th:classappend="${#fields.hasErrors('preparationTime')} ? 'is-invalid'">
+                <div class="invalid-feedback" th:errors="*{preparationTime}"></div>
+            </div>
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label" th:text="#{dish.description}">Description</label>
+            <textarea th:field="*{description}" rows="4" class="form-control" th:classappend="${#fields.hasErrors('description')} ? 'is-invalid'"></textarea>
+            <div class="invalid-feedback" th:errors="*{description}"></div>
+        </div>
+
+        <div class="form-check mb-3">
+            <input type="checkbox" th:field="*{isAvailable}" class="form-check-input">
+            <label class="form-check-label" for="isAvailable1" th:text="#{dish.isAvailable}">Available</label>
+        </div>
+
+        <button type="submit" class="btn btn-primary" th:text="#{common.save}">Save</button>
+        <a class="btn btn-outline-secondary" th:href="@{/dishes}" th:text="#{common.cancel}">Cancel</a>
+    </form>
+</div>
+</body>
+</html>
